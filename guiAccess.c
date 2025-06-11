@@ -4,15 +4,33 @@
 #include <stdio.h> //para outputs and inputs
 #include <string.h> //para cadena de caracteres 
 #include <stdlib.h> //para utilizar la funcion exit()
-
+#include <ctype.h> //para utilizar isdigit
+//Limpia el buffer/salto de linea que genera fgets o scanf
 void limpiarSalto(char *cadena){
     cadena [strcspn(cadena, "\n")]= '\0';
+}
+//Verifica que haya al menos 2 numeros en la contraseña 
+int verDosNros(const char *contraseña) {
+    int contador= 0;
+    for (int i = 0; contraseña[i] != '\0'; i++)
+    {
+        if (isdigit(contraseña[i]))
+        {
+            contador++;
+            if (contador>=2)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 int main()
 
 {
-    char user[31], passwd[31], user1[31], passwd1[31];
+    FILE *fp;
+    char user[31], passwd[101], user1[31], passwd1[101];
     int choice1, choice2;
 
     printf("Bienvenido a KeepItPrivate.\n");
@@ -53,19 +71,45 @@ int main()
             }
             case(2):
             {
-                printf("Creación de usuario.\n");
-                printf("Crea un usuario: ");
-                fgets(user, sizeof(user), stdin);
-                limpiarSalto(user);
-                strcpy(user, user1);
+                //Bucle para verificar que el largor del nombre de usuario no supere los 30 caracteres.
+                while(1)
+                {
+                    printf("Crea un nombre de usuario: ");
+                    fgets(user, sizeof(user), stdin);
+                    limpiarSalto(user);
 
-                printf("\nCrea una contraseña. (Debe ser de 14 dígitos, poseer 4 números y un al menos un carácter especial.)\n");
-                printf("No te preocupes si no ves lo que escribes, de esta forma esta diseñado.\n");
-                printf("Contraseña: ");
-                fgets(passwd, sizeof(passwd), stdin);
-                limpiarSalto(passwd);
-                strcpy(passwd, passwd1);
+                    if(strlen(user)>30)
+                    {
+                        printf("\nEl nombre del usuario no puede ser mayor a 30 caracteres.\n");
+                        printf("Inténtelo de nuevo.\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                while(1)
+                {
+                    printf("No se preocupe si no puede visualizar lo que escribe, realmente esta escribiendo tenga cuidado.\n");
+                    printf("Cree su contraseña: ");
+                    fgets(passwd, sizeof(passwd), stdin);
+                    limpiarSalto(passwd);
 
+                    if (strlen(passwd)< 14) //Verifica que la contraseña tenga al menos 14 digitos.
+                    {
+                        printf("\nSu contraseña es demasiado corta.\n");
+                        printf("Intente de nuevo.\n");
+                    }
+                    else if (!verDosNros(passwd)) //verifica que la contraseña contenga al menos 2 numeros.
+                    {
+                        printf("\nSu contraseña debe de tener al menos 2 números.\n");
+                        printf("Intente de nuevo\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
                 break;
             }
             case(3):
