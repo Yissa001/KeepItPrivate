@@ -57,12 +57,14 @@ int main()
                 printf("Crea un usuario: ");
                 fgets(user, sizeof(user), stdin);
                 limpiarSalto(user);
+                strcpy(user, user1);
 
                 printf("\nCrea una contraseña. (Debe ser de 14 dígitos, poseer 4 números y un al menos un carácter especial.)\n");
                 printf("No te preocupes si no ves lo que escribes, de esta forma esta diseñado.\n");
                 printf("Contraseña: ");
                 fgets(passwd, sizeof(passwd), stdin);
                 limpiarSalto(passwd);
+                strcpy(passwd, passwd1);
 
                 break;
             }
