@@ -1,3 +1,6 @@
+#Ignora binarios//Ignore binaries
+usuarios.dat
+guiAccess
 *.exe
 *.o
 *.log
