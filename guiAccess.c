@@ -5,6 +5,8 @@
 #include <string.h> //para cadena de caracteres 
 #include <stdlib.h> //para utilizar la funcion exit()
 #include <ctype.h> //para utilizar isdigit
+#include <openssl/sha.h>
+#include <openssl/rand.h>
 #define FILE_NAME "usuarios.dat" //archivo para guardar usuarios y contraseñas 
 #define MAX_USER 30
 #define MAX_PASS 100
