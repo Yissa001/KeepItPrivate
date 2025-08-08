@@ -135,19 +135,29 @@ int main()
                 fgets(inputPass, sizeof(inputPass), stdin);
                 limpiarSalto(inputPass);
 
-                if ((strcmp(user1, user)==0)&&(strcmp(passwd, passwd1)==0))
-                {
-                    printf("Acceso concedido.\n");
+
+		//Verificacion de usuario.
+                if (strcmp(inputUser, user) !=0){
+                    printf("Usuario incorrecto.\n");
+		    break;
                 }
-                else
-                {
-                    printf("Usuario o contraseña incorrecta. Intente de nuevo.\n");
-                }
-                break;
-            }
-            case(2):
+                
+		//Verificador de contraseña 
+		unsigned char inputHash[HASH_SIZE];
+		generarHash(inputPass, salt, inputHash);
+
+		if (memcmp(inputHash, storedHash, HASH_SIZE) == 0) {
+			printf("\nAcceso concedido. ¡Bienvenido %s!\n", user)
+			}
+		else {
+			printf("Contraseña incorrecta.\n");
+		}
+		break;
+	}
+
+            case(2): //Creación de usuario unico
             {
-		    if (user[0] != '\0'){
+		    if (usuarioExistente){
 			    printf("Ya existe un usuario registrado. Solo se permite uno.\n");
 			    break;
 			}
@@ -155,50 +165,64 @@ int main()
                 //Bucle para verificar que el largor del nombre de usuario no supere los 30 caracteres.
                 while(1)
                 {
-                    printf("Crea un nombre de usuario: ");
+                    printf("Crear nuevo usuario\n");
+		    printf("Nombre de usuario (max %d caracteres): ", MAX_USER)
                     fgets(user, sizeof(user), stdin);
                     limpiarSalto(user);
 
-                    if(strlen(user)>=MAX_USER)
+                    if(strlen(user) = 0)
                     {
-                        printf("\nEl nombre del usuario no puede ser mayor a 30 caracteres.\n");
-                        printf("Inténtelo de nuevo.\n");
+                        printf("\nEl nombre del usuario no puede estar vacío.\n");
                     }
-                    else
+                    else if (strlen(user) > MAX_USER)
                     {
-                        break;
+                        printf("El nombre es demasiado largo.\n");
                     }
+		    else {
+			    break;
+			}
                 }
+
+		//Validar contraseña 
                 while(1)
                 {
-                    printf("No se preocupe si no puede visualizar lo que escribe, realmente esta escribiendo tenga cuidado.\n");
-                    printf("Cree su contraseña: ");
-                    fgets(passwd, sizeof(passwd), stdin);
-                    limpiarSalto(passwd);
+                    printf("Requisitos de contraseña:");
+                    printf("\n- Mínimo 14 caracteres");
+		    printf("\n- Al menos debe contener 2 números\n");
+		    printf("Contraseña: ")
+                    fgets(inputPass, sizeof(inputPass), stdin);
+                    limpiarSalto(inputPass);
 
-                    if (strlen(passwd)< 14) //Verifica que la contraseña tenga al menos 14 digitos.
+
+                    if (strlen(inputPass)< 14) //Verifica que la contraseña tenga al menos 14 digitos.
                     {
-                        printf("\nSu contraseña es demasiado corta.\n");
-                        printf("Intente de nuevo.\n");
+                        printf("\nLa contraseña es demasiado corta.\n");
                     }
                     else if (!verDosNros(passwd)) //verifica que la contraseña contenga al menos 2 numeros.
                     {
-                        printf("\nSu contraseña debe de tener al menos 2 números.\n");
-                        printf("Intente de nuevo\n");
+                        printf("\nLa contraseña debe contener al menos 2 números.\n");
                     }
                     else
                     {
                         break;
                     }
                 }
+
 		printf("DEBUG: Guardando usuario en archivo...\n");
-		guardarUsuario(user, passwd); //Guarda solo cuando la contraseña es valida
+		guardarUsuario(user, inputPass); //Guarda solo cuando la contraseña es valida
+		usuarioExistente = 1;
+		printf("Usuario creado exitosamente!\n");
                 break;
+
             }
             case(3):
             {
+		    printf("Saliendo...\n");
                 exit(0);
             }
+	    default: {
+			     printf("Opción no válida.\n");
+			}
         }
     }
     return (0);
