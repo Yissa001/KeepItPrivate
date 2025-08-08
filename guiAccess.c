@@ -10,7 +10,9 @@
 #define FILE_NAME "usuarios.dat" //archivo para guardar usuarios y contraseñas 
 #define MAX_USER 30
 #define MAX_PASS 100
-
+#define SALT_SIZE 16 // Tamaño del Slat
+#define HASH_SIZE SHA512_DIGEST_LENGTH // Sha512 que produce 64-byte hashes
+				       //
 //Limpia el buffer/salto de linea que genera fgets o scanf
 void limpiarSalto(char *cadena){
     cadena [strcspn(cadena, "\n")]= '\0';
@@ -32,67 +34,106 @@ int verDosNros(const char *contraseña) {
     return 0;
 }
 
+void generarSalt(unsigned char *salt) {  //Genera salt único
+	if (!RAND_bytes(salt, SALT_SIZE)) {
+		printf("Error generando slat.\n");
+		exit(1);
+	}
+}
+
+void generarHash(const char *contraseña, const unsigned char *salt, unsigned char *hash) {
+	unsigned char saltedPass[MAX_PASS + SALT_SIZE];
+
+	//Concatenar contraseña con la salt
+	strcpy((char *)saltedPass, contraseña);
+	memcpy(saltedPass + strlen(contraseña), salt, SALT_SIZE);
+
+	//Generar hash SHA512 
+	SHA512(saltedPass, strlen(contraseña) + SALT_SIZE, hash);
+}
+
+
 void guardarUsuario(const char *user, const char *passwd) {
 	FILE *fp =fopen(FILE_NAME, "wb"); //Abre el archivo en modo de escritura binaria
 	if (fp == NULL) {
 		printf("Error al crear el archivo.\n");
 		exit(1);
 	}
-	//Escribe el usuario y contraseña en el archivo
+
+	unsigned char salt(SALT_SIZE);
+	unsigned char hash(HASH_SIZE);
+	
+	//Generar el salt y el Hash 
+	generarSalt(salt);
+	generarHash(hash);
+
+	//Escribe el usuario y contraseña en el archivo (salt y hash no la contraseña en texto plano)
 	fwrite(user, sizeof(char), MAX_USER, fp);
-	fwrite(passwd, sizeof(char), MAX_PASS, fp);
+	fwrite(salt, sizeof(unsigned char), SALT_SIZE, fp);
+	fwrite(hash, sizeof(unsigned char), HASH_SIZE, fp);
+
 	fclose(fp); //Cierra el archivo 
 	printf("Usuario registrado exitosamente!\n");
 }
 
-void leerUsuario(char *user, char *passwd) {
+void leerUsuario(char *user, unsigned char *salt, unsigned char *hash) {
 	FILE *fp = fopen(FILE_NAME, "rb"); //Abre el archivo en modo lectura binaria 
 	if (fp == NULL) {
-		user[0] = '\0';
-		passwd[0] = '\0';
-		return;
+		return 0;
 	}
+
 	//Leer usuario y contraseña desde el archivo 
 	fread(user, sizeof(char), MAX_USER, fp);
-	fread(passwd, sizeof(char), MAX_PASS, fp);
+	fread(salt, sizeof(unsigned char), SALT_SIZE, fp);
+	fread(hash, sizeof(unsigend char), HASH_SIZE, fp);
+
 	fclose(fp);
+	return 1;
 }
 
 
 int main()
 
 {
-    char user1[MAX_USER + 1], passwd1[MAX_PASS + 1];
-    int choice1;
+    char user[MAX_USER + 1] = "";
+    char inputUser[MAX_USER + 1];
+    char inputPass[MAX_PASS + 1];
+    unsigned char salt[SALT_SIZE];
+    unsigned char hash[HASH_SIZE];
+    int choice;
 
     printf("Bienvenido a KeepItPrivate.\n");
     printf("\nPulse ""ENTER"" para continuar...\n");
 
     getchar(); //Aguarda que el usuario presione enter
-	char user[MAX_USER + 1] = ""; //+1 para el caracter nulo
-	char passwd[MAX_PASS + 1] = "";
-	leerUsuario(user, passwd); //Carga datos desde el archivo
+	int usuarioExistente = leerUsuario(user, salt, storedHash);
 	
     while(1)
     {
         printf("Elige un número:\n");
         printf("1-) Iniciar sesión.\n");
         printf("2-) Crear nuevo usuario.\n");
-        printf("3-) Cerrar aplicación.\n");
-        scanf(" %d", &choice1);
-        getchar();
+        printf("3-) Salir.\n");
+	printf("Opción");
+        scanf(" %d", &choice);
+        getchar(); //Limpia buffer 
 
-        switch (choice1){
+        switch (choice){
             case(1):
             {
-                printf("Inicio de sesión\n");
-                printf("Nombre de usuario: ");
-                fgets(user1, sizeof(user1), stdin);
-                limpiarSalto(user1);
+		    if(!usuarioExistente) {
+			    printf("No hay usuarios registrados. Crea uno primero.\n");
+			    break;
+			}
 
-                printf("\nIntroduce la contraseña del usuario %s:", user1);
-                fgets(passwd1, sizeof(passwd1), stdin);
-                limpiarSalto(passwd1);
+                printf("Inicio de sesión\n");
+                printf("Usuario: ");
+                fgets(inputUser, sizeof(inputUser), stdin);
+                limpiarSalto(inputUser);
+
+                printf("Contraseña: ");
+                fgets(inputPass, sizeof(inputPass), stdin);
+                limpiarSalto(inputPass);
 
                 if ((strcmp(user1, user)==0)&&(strcmp(passwd, passwd1)==0))
                 {
