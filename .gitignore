@@ -4,3 +4,6 @@ guiAccess
 *.exe
 *.o
 *.log
+*.dat
+*.c
+
