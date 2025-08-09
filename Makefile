@@ -1,16 +1,16 @@
 #Compilador y flags
 
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c11
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -O2
 LDFLAGS = -lssl -lcrypto
 TARGET = guiAccess
 
-SOURCES = guiAccess.c
+SRC = guiAccess.c
 
 #Regla principal, se ejecuta al escribir make
 all: $(TARGET)
 
-$(TARGET): $(SOURCES)
+$(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 	@echo "Compilación exitosa. Ejecuta ./$(TARGET)"
 
@@ -21,8 +21,8 @@ clean:
 
 #Instala dependencias (En arch linux)
 install-deps:
-	sudo pacman -S openssl
-	@echo"Dependencias instaladas"
+	sudo pacman -S --needed  openssl
+	@echo "Dependencias instaladas"
 
 #Ayuda
 help:

@@ -5,5 +5,5 @@ guiAccess
 *.o
 *.log
 *.dat
-*.c
+
 
